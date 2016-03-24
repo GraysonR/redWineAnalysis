@@ -1,0 +1,9 @@
+{
+    "path" : "~/Development/Udacity/red-wine-analysis",
+    "sortOrder" : [
+        {
+            "ascending" : true,
+            "columnIndex" : 2
+        }
+    ]
+}
