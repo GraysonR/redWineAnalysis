@@ -245,7 +245,7 @@ As quality goes up the sulphates seem to increase slightly but there is a lot of
 ```{r SO2, echo=FALSE}
 ggplot(data = subset(rw, total.sulfur.dioxide < quantile(total.sulfur.dioxide, .99)), 
        aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide)) +
-  geom_point(alpha = .25, position = position_jitter(h = 2)) +
+  geom_point(alpha = .25) +
   geom_smooth(method = 'lm', formula = y ~ x) +
   scale_x_continuous(breaks = seq(0, 150, 12))
 ```
@@ -286,11 +286,11 @@ ggplot(data = rw, aes(citric.acid)) +
   scale_x_continuous(breaks = seq(0, 1, .1))
 ```
 
-The data at the extreme qualities is rather limited. This makes it hard to pick up on possible trends/correlations. Looking at the graphs it appears that the lower quality citric acid distributions are more left shifted than the higher quality distributions, but there are exceptions (i.e., wines rated 7 and 8).
+The data at the extreme qualities is rather limited. This makes it hard to pick up on possible trends/correlations. Looking at the graphs it appears that the lower quality citric acid distributions are more left shifted than the higher quality distributions, but there are exceptions (i.e., wines rated 7 and 8).  
 
 ```{r Quality and Alcohol, echo=FALSE}
 ggplot(data=rw, aes(alcohol)) +
-  geom_histogram(aes(fill=quality.factor), binwidth = .5) +
+  geom_histogram(aes(fill=quality.factor), binwidth = .4) +
   scale_x_continuous(breaks=seq(0,20, .5))
 
 ggplot(data=rw, aes(alcohol)) +
@@ -298,12 +298,14 @@ ggplot(data=rw, aes(alcohol)) +
   scale_x_continuous(breaks=seq(0,20, .5)) +
   facet_grid(quality.factor ~ ., scales='free_y')
 ```
-This shows the best correlation between a variable and quality so far. It is far from perfect. For instance, in the lower rankings the pattern of increasing alcohol does not correlate with a better ranking. In multivariate I should see if another variable and a respectable amount of alcohol make for a bad wine.
+
+This shows the best correlation between a variable and quality so far. It is far from perfect. For instance, in the lower rankings the pattern of increasing alcohol does not correlate with a better ranking. In multivariate I should see if another variable and a respectable amount of alcohol make for a bad wine.  
 
 ```{r Alcohol and Chlorides, echo=FALSE}
 ggplot(data=rw, aes(x = alcohol, y = chlorides)) +
   geom_point()
 ```
+
 Chlorides may be that other variable I test against. 
 
 ```{r Alcohol and Total SO2, echo=FALSE}
@@ -340,13 +342,31 @@ ggplot(data=rw, aes(volatile.acidity)) +
 
 It appears that volatile acidity has an affect on quality. As the quality increases the peaks of each distribution moves right (volatile acidity decreases).  
 
+```{r SO2 greater than 50, echo=FALSE}
+ggplot(data=subset(rw, free.sulfur.dioxide >= 50), aes(free.sulfur.dioxide)) +
+  geom_histogram(aes(fill=quality.factor), binwidth=1)
+
+ggplot(data=subset(rw, free.sulfur.dioxide < 50), aes(free.sulfur.dioxide)) +
+  geom_histogram(aes(fill=quality.factor), binwidth=2)
+
+ggplot(data=subset(rw, total.sulfur.dioxide >= 50), aes(total.sulfur.dioxide)) +
+  geom_histogram(aes(fill=quality.factor), binwidth=8)
+
+ggplot(data=subset(rw, total.sulfur.dioxide < 50), aes(total.sulfur.dioxide)) +
+  geom_histogram(aes(fill=quality.factor), binwidth=2)
+```
+
+If a wine has less than 50 total SO2 ppm then the wine has a noticeabbly higher quality rating.
+
 #### Talk about some of the relationships you observed in this part of the investigation. How did the feature(s) of interest vary with other features in the dataset?
 
 As sulphates increased there seemed to be an increase in the quality. Although it wasn't perfect there did seem to be a noticeable trend.  
 
 As alcohol increased there was an increase in quality. This relationship was much more pronounced than in the sulphates, and there were less extreme outliers in the alcohol distributions than there were in the sulpahtes distribution. 
 
-Finally, the less volatile acidity in the wine the better rating it got. This is not universal, there are overlaps between the quality distributions, but it is noticeable.  
+The less volatile acidity in the wine the better rating it got. This is not universal, there are overlaps between the quality distributions, but it is noticeable.  
+
+If a wine had less than 50ppm of sulphates it was likely to have a much better ranking.
 
 #### Did you observe any interesting relationships between the other features (not the main feature(s) of interest)?
 As citric acid increased there was a decrease in volatile acidity. Therefore, I thought that there would be a correlation between citric acid and quality. However, there was no correlation between citric acid and quality.  
@@ -361,7 +381,7 @@ It is a tie between alcohol's and volatile acidity's relationship with quality.
 ## Multivariate Analysis
 
 
-```{r, echo=FALSE}
+```{r Total vs. Free SO2 and quality, echo=FALSE}
 ggplot(data = subset(rw, total.sulfur.dioxide < quantile(total.sulfur.dioxide, .99)), 
        aes(x = total.sulfur.dioxide, y = free.sulfur.dioxide)) +
   geom_point(aes(color=quality.factor)) +
@@ -396,7 +416,13 @@ ggplot(data = rw, aes(y = citric.acid, x = fixed.acidity)) +
   geom_point(aes(color=quality.factor))
 ```
 
-Nothing stands out in the graph above.
+Seems to be a grouping of blue that has moderate amounts of citric acid and low volatile acidity.
+
+```{r Citric and volatile acid with quality subset, echo=FALSE}
+ggplot(data = subset(rw, volatile.acidity < .6), 
+       aes(y = citric.acid, x = volatile.acidity)) +
+  geom_point(aes(color=quality.factor))
+```
 
 ```{r High citric acid and low volatile acidity, echo=FALSE}
 ggplot(data=subset(rw, citric.acid > quantile(citric.acid, .5) & 
@@ -407,3 +433,111 @@ ggplot(data=subset(rw, citric.acid > quantile(citric.acid, .5) &
   geom_bar(data=subset(rw, citric.acid > quantile(citric.acid, .75) & 
                      volatile.acidity < quantile(volatile.acidity, .25)), fill='blue')
 ```
+
+Nothing really useful here. The blue is citric acid in the top quarter quantile and volatile acid in bottom quarter quantile. Purple is citric in bottom half quantile and volatile in top half quantile.  
+I was hoping to see a relationship between the two affecting quality, but because I'm taking smaller and smaller subset I have no idea if it is signifcant when I can only compare it overall.
+
+```{r Alcohol and Volatile Acidity with quality, echo=FALSE}
+ggplot(data=rw, aes(y = alcohol, x = volatile.acidity)) +
+  geom_point(aes(color=quality.factor))
+
+ggplot(data=subset(rw, volatile.acidity < .5), 
+       aes(y = alcohol, x = volatile.acidity)) +
+  geom_point(aes(color=quality.factor)) +
+  facet_grid(. ~ quality.factor) +
+  labs(x = 'Volatile Acidity (Less than .5)')
+```
+
+There seems to be a grouping of blue with high alcohol and low volatile acidity.
+
+```{r Alcohol and Sulphates with quality, echo=FALSE}
+ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
+       aes(y = alcohol, x = sulphates)) +
+  geom_point(aes(color=quality.factor))
+
+ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
+       aes(y = alcohol, x = sulphates)) +
+  geom_point(aes(color=quality.factor)) +
+  facet_grid(quality.factor ~ .)
+```
+
+As sulphates and alcohol increase there appears to be an increase in quality.
+
+```{r Alcohol and total SO2 less than 50, echo=FALSE}
+ggplot(data = subset(rw, total.sulfur.dioxide < 50), 
+       aes(x = alcohol, y = total.sulfur.dioxide)) +
+  geom_point(aes(color=quality.factor))
+
+ggplot(data = subset(rw, total.sulfur.dioxide < 50), 
+       aes(x = alcohol, y = total.sulfur.dioxide)) +
+  geom_point(aes(color=quality.factor)) +
+  facet_grid(quality.factor ~ .)
+```
+
+Nothing of interest.
+
+```{r Good SO2 and sweet, echo=FALSE}
+ggplot(data = subset(rw, free.sulfur.dioxide < 50), 
+       aes(x = alcohol, y = free.sulfur.dioxide)) +
+  geom_point(aes(color=quality.factor))
+```
+
+```{r Sulphates and free SO2 with quality, echo=FALSE}
+ggplot(data=rw, aes(y = sulphates, x = free.sulfur.dioxide/total.sulfur.dioxide)) +
+  geom_point(aes(color=quality.factor))
+```
+
+Nothing of interest.
+
+```{r volatile acidity and sulphates}
+ggplot(data=subset(rw, volatile.acidity < .5), 
+       aes(y = sulphates, x = volatile.acidity)) +
+  geom_point(aes(color=quality.factor)) +
+  geom_hline(yintercept=mean(rw$sulphates), linetype=2, alpha=.5)
+```
+
+Nothing of interest. The horizontal line is the mean value of sulphates.
+
+#### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
+
+Alcohol was a consisten factor that improved quality. In addition, with low volatile acidity and high sulphates there was a stronger relationship with quality.
+
+#### Were there any interesting or surprising interactions between features?
+
+I was expecting a free SO2 to have more of an affect because of its affect on taste, but it seems that the total SO2 had more of an affect.
+
+***
+
+# Final Plots and Summary
+
+### Plot One
+```{r echo=FALSE, Plot_One}
+ggplot(data=rw, aes(alcohol)) +
+  geom_histogram(aes(fill=quality.factor), binwidth = .4) +
+  scale_x_continuous(breaks=seq(0,20, .5))
+```
+
+### Description One
+
+
+### Plot Two
+```{r echo=FALSE, Plot_Two}
+ggplot(data=rw, aes(y = alcohol, x = volatile.acidity)) +
+  geom_point(aes(color=quality.factor))
+```
+
+### Description Two
+
+
+### Plot Three
+```{r echo=FALSE, Plot_Three}
+ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
+       aes(y = alcohol, x = sulphates)) +
+  geom_point(aes(color=quality.factor))
+```
+
+### Description Three
+
+***
+
+# Reflection
