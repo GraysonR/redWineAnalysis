@@ -22,6 +22,7 @@ library(GGally)
 ***
 
 ### Guiding question: 
+
 Which chemical properties influence the quality of red wines?
 
 ***
@@ -41,7 +42,6 @@ str(rw)
 ggplot(data = rw, aes(quality)) +
   geom_bar(color = 'red') +
   scale_y_continuous(breaks = seq(0, 800, 50))
-  ggtitle("Quality (Ranking)")
 
 ggplot(data = rw, aes(quality)) +
   geom_bar(color = 'red') +
@@ -51,24 +51,26 @@ ggplot(data = rw, aes(quality)) +
 
 table(rw$quality)
 ```
+
 The vast majority of the wines got ranked 5 and 6 with each rank away from 5 and 6 having a magnitude less number
 
 ```{r ph, Alcohol, Fixed Acidity univariate graphs, echo = FALSE}
 ggplot(data = rw, aes(pH)) +
   geom_histogram(binwidth = .05, color = 'red') +
-  scale_x_continuous(breaks=seq(1,5, .1)) +
+  scale_x_continuous(breaks=seq(1, 5, .1)) +
   ggtitle("pH")
 
 ggplot(data = rw, aes(alcohol)) +
   geom_histogram(binwidth = .5, color = 'red') +
-  scale_x_continuous(breaks=seq(0,20, .5)) +
+  scale_x_continuous(breaks=seq(0, 20, .5)) +
   ggtitle("Alcohol")
 
 ggplot(data = rw, aes(fixed.acidity)) +
   geom_histogram(binwidth = .2, color = 'red') +
-  scale_x_continuous(breaks=seq(0,20, 1)) +
+  scale_x_continuous(breaks=seq(0, 20, 1)) +
   ggtitle("Fixed Acidity")
 ```
+
 Overall acidity, alcohol level, and the fixed acidity all are normally distributed with positive skewness on acohol and fixed acidity.
 
 ```{r Citric acid, echo=FALSE}
@@ -77,15 +79,16 @@ ggplot(data = rw, aes(citric.acid)) +
   scale_x_continuous(breaks=seq(0,1, .1)) +
   ggtitle("Citric Acid")
 ```
-Citric acid in a large number of wines is 0, and the distribution is positively--and noticeable flat-- skewed.  
 
-#### Acid summaries (Fixed, volatile, citric)
-```{r All acids, echo=FALSE}
+Citric acid in a large number of wines is 0 and the distribution is relatively flat.
+
+#### Acid summaries (Fixed, volatile)
+```{r All acids}
 summary(rw$fixed.acidity)
 summary(rw$volatile.acidity)
-summary(rw$citric.acid)
 ```
-Each acidity measurement seems to be different. Fixed acidity seems to be positively skewed while volatile acidity is less harshly skewed but has some positive outliers while citric acid has a almost exponential distribution.
+
+The measures of acidity seem to be different. Fixed acidity seems to be positively skewed while volatile acidity is less harshly skewed but has some positive outliers.
 
 ```{r Chlorides histogram, echo=FALSE}
 ggplot(data = rw, aes(chlorides)) +
@@ -105,6 +108,7 @@ ggplot(data = subset(rw, chlorides < quantile(chlorides, .98)),
 # Median
 median(rw$chlorides)
 ```
+
 There are several major outliers for chloride measurment, but around the mean and median the distribution is normal.
 
 
@@ -125,6 +129,7 @@ ggplot(data = subset(rw, total.sulfur.dioxide < quantile(total.sulfur.dioxide, .
   scale_x_continuous(breaks = seq(0, 150, 15)) +
   labs(x = 'Total Sulfur Dioxide (mg / dm^3)')
 ```
+
 Both measueres of sulfur dioxide (SO2) are positively skewed. According to the description of the data "SO2 concentrations over 50 ppm [are] evident in the nose and taste of wine." It may be interesting later to see what affect this evident taste has on a wine's rating.
 
 ```{r Sulfur above 50 ppm}
@@ -132,11 +137,11 @@ Both measueres of sulfur dioxide (SO2) are positively skewed. According to the d
 dim(subset(rw, total.sulfur.dioxide >= 50))[1]
 557 / 1599
 ```
+
 Out of the 1599 entries there are 557 with SO2 above 50. This is about 34.8% of the entries.
 
 ```{r Residual Sugars, echo=FALSE}
-ggplot(data = rw, 
-       aes(residual.sugar)) +
+ggplot(data = rw, aes(residual.sugar)) +
   geom_histogram(color = 'red', binwidth = 0.2)
 
 ggplot(data = rw,
@@ -151,7 +156,8 @@ ggplot(data = subset(rw,residual.sugar < quantile(residual.sugar, .99)),
 
 summary(rw$residual.sugar)
 ```
-Residual sugars are normal with outliers.  
+
+Residual sugars distribution is normal with outliers.  
 This seems to be a reoccurring pattern. Later it may be interesting to compare the tails with each other to see if there is a correlation between the extremes and good or bad wine.
 
 ```{r Density, echo=FALSE}
@@ -159,6 +165,7 @@ ggplot(data = rw, aes(density)) +
   geom_histogram(binwidth = .0005, color = 'red') +
   scale_x_continuous(breaks = seq(.985, 1.01, 0.0015))
 ```
+
 Density is tightly distributed with a normal distribution showing no apparent skewness.
 
 ```{r Sulphates, echo=FALSE}
@@ -172,6 +179,7 @@ ggplot(data = subset(rw, sulphates < quantile(sulphates, .99)),
 
 summary(rw$sulphates)
 ```
+
 Positively skewed with extreme positive outliers. Also, the entries are fairly spread out. According to the data file sulphates "can contribute to sulfur dioxide gas".
 
 ```{r Sulphates and sulfur dioxide, echo=FALSE}
@@ -185,6 +193,7 @@ plt2 <- ggplot(data = rw, aes(total.sulfur.dioxide)) +
 
 grid.arrange(plt1, plt2, ncol = 1)
 ```
+
 Both do have similar tails, but the total sulfur dioxide is not as normal as the sulphates.  
 
 
@@ -220,6 +229,7 @@ rw.corr <- cor(rw.num, method='pearson')
 rw.corr
 abs(rw.corr) > .5
 ```
+
 ```{r GGpairs, echo=FALSE, eval=FALSE}
 col <- c('volatile.acidity', 'citric.acid', 'residual.sugar', 'chlorides', 'free.sulfur.dioxide', 'total.sulfur.dioxide', 'ph', 'sulphates', 'alcohol', 'quality')
 ggpairs(data = rw, columns = col)
@@ -489,7 +499,7 @@ ggplot(data=rw, aes(y = sulphates, x = free.sulfur.dioxide/total.sulfur.dioxide)
 
 Nothing of interest.
 
-```{r volatile acidity and sulphates}
+```{r volatile acidity and sulphates, echo=FALSE}
 ggplot(data=subset(rw, volatile.acidity < .5), 
        aes(y = sulphates, x = volatile.acidity)) +
   geom_point(aes(color=quality.factor)) +
@@ -512,32 +522,47 @@ I was expecting a free SO2 to have more of an affect because of its affect on ta
 
 ### Plot One
 ```{r echo=FALSE, Plot_One}
-ggplot(data=rw, aes(alcohol)) +
-  geom_histogram(aes(fill=quality.factor), binwidth = .4) +
-  scale_x_continuous(breaks=seq(0,20, .5))
+ggplot(data = rw, aes(quality.factor)) +
+  geom_bar(color = 'red') +
+  scale_y_log10(breaks=c(10, 25, 50, 100, 200, 400, 800)) +
+  ggtitle("Quality (Ranking)") +
+  labs(y = 'count (log10)')
 ```
 
 ### Description One
 
+The majority of the wines are rated 5 or 6. The number of wines rated something else drops by a magnitude the farther away it gets from 5 or 6.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
-ggplot(data=rw, aes(y = alcohol, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor))
+ggplot(data=rw, aes(alcohol)) +
+  geom_histogram(aes(fill=quality.factor), binwidth = .4) +
+  scale_x_continuous(breaks=seq(0,20, .5)) +
+  labs(x='Alcohol (%)')
 ```
 
 ### Description Two
 
+As alcohol increases there is trend of the wines improving in quality. Perhaps this is because the longer a wine matures the more time yeast has to turn sugars into alcohol. This may mean that older wines are generally rated higher.   
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
        aes(y = alcohol, x = sulphates)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality.factor)) +
+  geom_hline(yintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
+  geom_vline(xintercept=mean(rw$sulphates), linetype=2, alpha=1/2) +
+  labs(x = 'Sulphates', y = 'Alcohol')
 ```
 
 ### Description Three
 
+The dashed lines are the mean alcohol level and mean sulphates. Wines with high sulphates and high alcohol are rated the best. There is a large clustering of average wines with lower sulphates and low alcohol. 
+
 ***
 
 # Reflection
+
+I started by looking at what was included in the dataset, what each variable was, and how the variables affected wine. Next, I began by examining the distributions of the different variables. From this I found that a lot of the data was normally distributed with either a positive skew or extreme outliers. Then I looked at how two variables affected one another only to find no clear correlation between variables I thought would be related. Therefore, I moved on a looked at varaibles distributions' overlayed with quality. This produced some interesting results because it was possible to see what was previously a normal distribution become a distribution that showed quality following a trend. Using what I found in the bivariate section,  I next explored how two variables had an affect on quality. I was hoping to find new interactions between variables that would have a clear affect on quality. I found that variables I knew had an affect on quality working together to make the improved qualities more noticeable and the variables I though might work together showed no sign of improving quality.  
+
+There are limitations to the data. There are only 1599 observations and the number of wines with quality not 5 or 6 is very low so trying to find patterns that differentiate wines based on quality is hard. In addition, the wines are only of one type, Portuguese "Vinho Verde" wine, which means that the results found here cannot be applied to all red wines in general. Finally, there are other variables not included that would be useful, such as length of fermentation, grape type, and year grape was grown. Overall, more observations and observations that were not purely chemical would help make this data set better.
