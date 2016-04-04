@@ -5,8 +5,9 @@ date: "March 21, 2016"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
 ```
 
 ```{r Load the data and install packages, echo=FALSE, message=FALSE, warning=FALSE}
@@ -48,7 +49,9 @@ ggplot(data = rw, aes(quality)) +
   scale_y_log10(breaks=c(10, 25, 50, 100, 200, 500, 750)) +
   ggtitle("Quality (Ranking)") +
   labs(y = 'count (log10)')
+```
 
+```{r Quality Table, echo=TRUE}
 table(rw$quality)
 ```
 
@@ -83,7 +86,7 @@ ggplot(data = rw, aes(citric.acid)) +
 Citric acid in a large number of wines is 0 and the distribution is relatively flat.
 
 #### Acid summaries (Fixed, volatile)
-```{r All acids}
+```{r All acids, echo=TRUE}
 summary(rw$fixed.acidity)
 summary(rw$volatile.acidity)
 ```
@@ -104,9 +107,9 @@ ggplot(data = subset(rw, chlorides < quantile(chlorides, .98)),
        aes(chlorides)) +
   geom_histogram(binwidth = 0.005, color = 'red') +
   scale_x_continuous(breaks = seq(0, .2, .025))
-
-# Median
-median(rw$chlorides)
+```
+```{r Chlordies description, echo=TRUE}
+summary(rw$chlorides)
 ```
 
 There are several major outliers for chloride measurment, but around the mean and median the distribution is normal.
@@ -132,7 +135,7 @@ ggplot(data = subset(rw, total.sulfur.dioxide < quantile(total.sulfur.dioxide, .
 
 Both measueres of sulfur dioxide (SO2) are positively skewed. According to the description of the data "SO2 concentrations over 50 ppm [are] evident in the nose and taste of wine." It may be interesting later to see what affect this evident taste has on a wine's rating.
 
-```{r Sulfur above 50 ppm}
+```{r Sulfur above 50 ppm, echo=TRUE}
 # Number of entries with sulfur ppm above 50.
 dim(subset(rw, total.sulfur.dioxide >= 50))[1]
 557 / 1599
@@ -153,10 +156,10 @@ ggplot(data = subset(rw,residual.sugar < quantile(residual.sugar, .99)),
        aes(residual.sugar)) +
   geom_histogram(color = 'red', binwidth = 0.2) +
   scale_x_continuous(breaks = seq(0, 8, .4))
-
+```
+```{echo=TRUE, Sugars summary}
 summary(rw$residual.sugar)
 ```
-
 Residual sugars distribution is normal with outliers.  
 This seems to be a reoccurring pattern. Later it may be interesting to compare the tails with each other to see if there is a correlation between the extremes and good or bad wine.
 
@@ -176,7 +179,8 @@ ggplot(data = subset(rw, sulphates < quantile(sulphates, .99)),
        aes(sulphates)) +
   geom_histogram(binwidth = .03, color = 'red') +
   scale_x_continuous(breaks = seq(0, 1.25, .075))
-
+```
+```{r Sulphates summary, echo=TRUE}
 summary(rw$sulphates)
 ```
 
@@ -331,12 +335,17 @@ ggplot(data=subset(rw, total.sulfur.dioxide < quantile(total.sulfur.dioxide, .99
 ggplot(data=rw, aes(x = alcohol, y = citric.acid)) +
   geom_point(alpha=1/5)
 ```
-
+```{r Correlation between Alcohol and Citric Acid, echo=TRUE}
+cor.test(rw$alcohol, rw$citric.acid)
+```
 Both graphs have a blob like scatter. There is no clear trend between just the two variables. It would be interesting to see if a third variable would order or seperate these two variables.
 
 ```{r Volatile Acidity and citric acid, echo=FALSE}
 ggplot(data=rw, aes(x = citric.acid, y = volatile.acidity)) +
   geom_point(alpha=1/5)
+```
+```{r Correlation between Volatile Acidity and Citric Acid, echo=TRUE}
+cor.test(rw$volatile.acidity, rw$citric.acid)
 ```
 
 This will be a must explore with quality colored in. Volatile acidity adds a bad vinegar taste in high amounts and citric acid in low (but existant) amounts adds freshness. I would hypothesize that the points on the left will ranked far lower than the points on the right.
@@ -409,10 +418,11 @@ Nothing stands out in the graphs above.
   
 ```{r Fixed and volatile acid with quality, echo=FALSE}
 ggplot(data = rw, aes(x = fixed.acidity, y = volatile.acidity)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality.factor)) +
+  geom_hline(yintercept=mean(rw$volatile.acidity), linetype=2, alpha=1/2) 
 ```
 
-There doesn't seem to be any grouping between volatile and fixed acidity. In addition, there is not clear pattern with relation to quality in the relationship either.
+There doesn't seem to be any grouping between volatile and fixed acidity. In addition, there is not clear pattern with relation to quality in the relationship either. Again, all that is clear is that wines with low volatitle acidity are ranked better (the dashed line is the mean for volatile acidity).
 
 ```{r Citric and volatile acid with quality, echo=FALSE}
 ggplot(data = rw, aes(y = citric.acid, x = volatile.acidity)) +
@@ -431,8 +441,12 @@ Seems to be a grouping of blue that has moderate amounts of citric acid and low 
 ```{r Citric and volatile acid with quality subset, echo=FALSE}
 ggplot(data = subset(rw, volatile.acidity < .6), 
        aes(y = citric.acid, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality.factor)) +
+  geom_vline(xintercept=mean(rw$volatile.acidity), linetype=2, alpha=1/2) +
+  geom_hline(yintercept=quantile(rw$citric.acid, .85), linetype=2, alpha=1/2) 
 ```
+
+Each dashed line is the mean. Nothing new. Wines with low volatile acidity are rated better, but we already knew that.
 
 ```{r High citric acid and low volatile acidity, echo=FALSE}
 ggplot(data=subset(rw, citric.acid > quantile(citric.acid, .5) & 
@@ -508,6 +522,17 @@ ggplot(data=subset(rw, volatile.acidity < .5),
 
 Nothing of interest. The horizontal line is the mean value of sulphates.
 
+```{r Sulpahtes and Alcohol with Quality where volatile acidity is low}
+ggplot(data=subset(rw, sulphates < quantile(sulphates, .98) 
+                   & volatile.acidity < mean(volatile.acidity)), 
+       aes(y = alcohol, x = sulphates)) +
+  geom_point(aes(color=quality.factor)) +
+  geom_hline(yintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
+  geom_vline(xintercept=mean(rw$sulphates), linetype=2, alpha=1/2)
+```
+
+Here is a plto os sulpahtes and alochol, but with wines that have low volatile acidity. It drastically reduces the number of bad and mediocore wines.  
+
 #### Talk about some of the relationships you observed in this part of the investigation. Were there features that strengthened each other in terms of looking at your feature(s) of interest?
 
 Alcohol was a consisten factor that improved quality. In addition, with low volatile acidity and high sulphates there was a stronger relationship with quality.
@@ -526,7 +551,8 @@ ggplot(data = rw, aes(quality.factor)) +
   geom_bar(color = 'red') +
   scale_y_log10(breaks=c(10, 25, 50, 100, 200, 400, 800)) +
   ggtitle("Quality (Ranking)") +
-  labs(y = 'count (log10)')
+  labs(y = 'count (log10)', x= 'Quality') +
+  ggtitle("Distribution of Quality")
 ```
 
 ### Description One
@@ -536,28 +562,33 @@ The majority of the wines are rated 5 or 6. The number of wines rated something 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
 ggplot(data=rw, aes(alcohol)) +
-  geom_histogram(aes(fill=quality.factor), binwidth = .4) +
+  geom_histogram(aes(fill=quality.factor), binwidth = .3) +
   scale_x_continuous(breaks=seq(0,20, .5)) +
-  labs(x='Alcohol (%)')
+  geom_vline(xintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
+  geom_vline(xintercept=quantile(rw$alcohol, .85), linetype=2, alpha=1/2, color='red') +
+  labs(x='Alcohol (%)', fill='Quality') +
+  ggtitle("Quality by Alcohol")
 ```
 
 ### Description Two
 
-As alcohol increases there is trend of the wines improving in quality. Perhaps this is because the longer a wine matures the more time yeast has to turn sugars into alcohol. This may mean that older wines are generally rated higher.   
+As alcohol increases there is trend of the wines improving in quality. The higher quality wines are a much larger proportion of the total number of wines when looking at wines with alcohol greater than the mean (to the right of the black dashed line). Also, almost all the wines with alcohol in the top 15% (to the right of the red dashed line) are high quality wines.   
+Perhaps this is because the longer a wine matures the more time yeast has to turn sugars into alcohol. This may mean that older wines are generally rated higher.   
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
        aes(y = alcohol, x = sulphates)) +
-  geom_point(aes(color=quality.factor)) +
+  geom_point(aes(color=quality.factor), size=2) +
   geom_hline(yintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
   geom_vline(xintercept=mean(rw$sulphates), linetype=2, alpha=1/2) +
-  labs(x = 'Sulphates', y = 'Alcohol')
+  labs(x = 'Sulphates (g / dm3)', y = 'Alcohol', color='Quality') +
+  ggtitle("Quality by Sulphates and Alcohol")
 ```
 
 ### Description Three
 
-The dashed lines are the mean alcohol level and mean sulphates. Wines with high sulphates and high alcohol are rated the best. There is a large clustering of average wines with lower sulphates and low alcohol. 
+The dashed lines are the mean alcohol level and mean sulphates. Wines with sulphates and alcohol  above the mean are rated better than wines with sulphates and alcohol below the mean. Each variable individually had an effect on quality and it is clear that when combined both have an even greater affect.
 
 ***
 
