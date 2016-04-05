@@ -418,7 +418,7 @@ Nothing stands out in the graphs above.
   
 ```{r Fixed and volatile acid with quality, echo=FALSE}
 ggplot(data = rw, aes(x = fixed.acidity, y = volatile.acidity)) +
-  geom_point(aes(color=quality.factor)) +
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4) +
   geom_hline(yintercept=mean(rw$volatile.acidity), linetype=2, alpha=1/2) 
 ```
 
@@ -426,14 +426,14 @@ There doesn't seem to be any grouping between volatile and fixed acidity. In add
 
 ```{r Citric and volatile acid with quality, echo=FALSE}
 ggplot(data = rw, aes(y = citric.acid, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 
 ggplot(data = rw, aes(y = citric.acid, x = volatile.acidity)) +
   geom_point(aes(color=quality.factor)) +
   facet_grid(quality.factor ~ .)
 
 ggplot(data = rw, aes(y = citric.acid, x = fixed.acidity)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 ```
 
 Seems to be a grouping of blue that has moderate amounts of citric acid and low volatile acidity.
@@ -441,7 +441,7 @@ Seems to be a grouping of blue that has moderate amounts of citric acid and low 
 ```{r Citric and volatile acid with quality subset, echo=FALSE}
 ggplot(data = subset(rw, volatile.acidity < .6), 
        aes(y = citric.acid, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor)) +
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4) +
   geom_vline(xintercept=mean(rw$volatile.acidity), linetype=2, alpha=1/2) +
   geom_hline(yintercept=quantile(rw$citric.acid, .85), linetype=2, alpha=1/2) 
 ```
@@ -463,7 +463,7 @@ I was hoping to see a relationship between the two affecting quality, but becaus
 
 ```{r Alcohol and Volatile Acidity with quality, echo=FALSE}
 ggplot(data=rw, aes(y = alcohol, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 
 ggplot(data=subset(rw, volatile.acidity < .5), 
        aes(y = alcohol, x = volatile.acidity)) +
@@ -477,7 +477,7 @@ There seems to be a grouping of blue with high alcohol and low volatile acidity.
 ```{r Alcohol and Sulphates with quality, echo=FALSE}
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
        aes(y = alcohol, x = sulphates)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
        aes(y = alcohol, x = sulphates)) +
@@ -490,7 +490,7 @@ As sulphates and alcohol increase there appears to be an increase in quality.
 ```{r Alcohol and total SO2 less than 50, echo=FALSE}
 ggplot(data = subset(rw, total.sulfur.dioxide < 50), 
        aes(x = alcohol, y = total.sulfur.dioxide)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 
 ggplot(data = subset(rw, total.sulfur.dioxide < 50), 
        aes(x = alcohol, y = total.sulfur.dioxide)) +
@@ -503,12 +503,12 @@ Nothing of interest.
 ```{r Good SO2 and sweet, echo=FALSE}
 ggplot(data = subset(rw, free.sulfur.dioxide < 50), 
        aes(x = alcohol, y = free.sulfur.dioxide)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 ```
 
 ```{r Sulphates and free SO2 with quality, echo=FALSE}
 ggplot(data=rw, aes(y = sulphates, x = free.sulfur.dioxide/total.sulfur.dioxide)) +
-  geom_point(aes(color=quality.factor))
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4)
 ```
 
 Nothing of interest.
@@ -516,7 +516,7 @@ Nothing of interest.
 ```{r volatile acidity and sulphates, echo=FALSE}
 ggplot(data=subset(rw, volatile.acidity < .5), 
        aes(y = sulphates, x = volatile.acidity)) +
-  geom_point(aes(color=quality.factor)) +
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4) +
   geom_hline(yintercept=mean(rw$sulphates), linetype=2, alpha=.5)
 ```
 
@@ -526,7 +526,7 @@ Nothing of interest. The horizontal line is the mean value of sulphates.
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98) 
                    & volatile.acidity < mean(volatile.acidity)), 
        aes(y = alcohol, x = sulphates)) +
-  geom_point(aes(color=quality.factor)) +
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4) +
   geom_hline(yintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
   geom_vline(xintercept=mean(rw$sulphates), linetype=2, alpha=1/2)
 ```
@@ -550,6 +550,10 @@ I was expecting a free SO2 to have more of an affect because of its affect on ta
 ggplot(data = rw, aes(quality.factor)) +
   geom_bar(color = 'red') +
   scale_y_log10(breaks=c(10, 25, 50, 100, 200, 400, 800)) +
+  geom_vline(xintercept=c(quantile(rw$quality, .1), quantile(rw$quality, .9)) - 2, 
+             linetype=2, alpha=1/2) +
+  geom_vline(xintercept=mean(rw$quality) - 2, alpha=1/2) +
+  geom_vline(xintercept=median(rw$quality) - 2, color = 'red', alpha=1/2) +
   ggtitle("Quality (Ranking)") +
   labs(y = 'count (log10)', x= 'Quality') +
   ggtitle("Distribution of Quality")
@@ -557,7 +561,9 @@ ggplot(data = rw, aes(quality.factor)) +
 
 ### Description One
 
-The majority of the wines are rated 5 or 6. The number of wines rated something else drops by a magnitude the farther away it gets from 5 or 6.
+The majority of the wines are rated 5 or 6. The number of wines rated something else drops by a magnitude the farther away it gets from 5 or 6. The red line is the median quality (6) and the black line is the mean quality. The dashed lines are mark the 10th and 90th percentile points. This is interesting because it suggests that a large number of the wines are similiar with very few outliers. This made noticing trends more difficult because of the limited number of values that were substantially different than the mean.  
+
+Perhaps this distribution is not due to limited differentiation in the wines, but rather limiting factors such as all the wines being of the same variety. It would be interesting to see how this data set compared to a data set of other wine varieties, such as Merlots or Pinot Noirs.
 
 ### Plot Two
 ```{r echo=FALSE, Plot_Two}
@@ -573,16 +579,18 @@ ggplot(data=rw, aes(alcohol)) +
 ### Description Two
 
 As alcohol increases there is trend of the wines improving in quality. The higher quality wines are a much larger proportion of the total number of wines when looking at wines with alcohol greater than the mean (to the right of the black dashed line). Also, almost all the wines with alcohol in the top 15% (to the right of the red dashed line) are high quality wines.   
+
 Perhaps this is because the longer a wine matures the more time yeast has to turn sugars into alcohol. This may mean that older wines are generally rated higher.   
 
 ### Plot Three
 ```{r echo=FALSE, Plot_Three}
 ggplot(data=subset(rw, sulphates < quantile(sulphates, .98)), 
        aes(y = alcohol, x = sulphates)) +
-  geom_point(aes(color=quality.factor), size=2) +
+  geom_point(aes(color=quality, size=(abs(mean(quality) - quality))), alpha=3/4) +
   geom_hline(yintercept=mean(rw$alcohol), linetype=2, alpha=1/2) +
   geom_vline(xintercept=mean(rw$sulphates), linetype=2, alpha=1/2) +
-  labs(x = 'Sulphates (g / dm3)', y = 'Alcohol', color='Quality') +
+  labs(x = 'Sulphates (g / dm3)', y = 'Alcohol', color='Quality', 
+       size='Distance from Mean of Quality') +
   ggtitle("Quality by Sulphates and Alcohol")
 ```
 
